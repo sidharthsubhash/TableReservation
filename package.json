@@ -1,0 +1,39 @@
+{
+  "name": "restaurant-reservation-food-ordering-system",
+  "version": "1.0.0",
+  "description": "P07 - Restaurant Table Reservation & Food Ordering System Backend API (Christ University CIA-3)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seed/seeder.js",
+    "test": "node tests/verify_api.js"
+  },
+  "keywords": [
+    "restaurant",
+    "table-reservation",
+    "food-ordering",
+    "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
+    "node"
+  ],
+  "author": "Academic Project Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.1.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0",
+    "nodemon": "^3.1.4"
+  }
+}

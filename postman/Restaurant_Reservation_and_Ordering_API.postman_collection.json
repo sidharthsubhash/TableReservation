@@ -1,0 +1,631 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "P07 - Restaurant Table Reservation & Food Ordering System API",
+    "description": "Comprehensive Postman API collection for all 13 functional modules of P07 Restaurant Table Reservation & Food Ordering Backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "customerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kitchenToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "managerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "branchId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tableId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "menuItemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reservationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Authentication",
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aarav Mehta\",\n  \"email\": \"aarav@gmail.com\",\n  \"password\": \"Customer@123Password\",\n  \"phone\": \"+91 98888 77777\",\n  \"address\": \"Koramangala, Bangalore\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login as Customer (Rahul)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('customerToken', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"rahul@gmail.com\",\n  \"password\": \"Customer@123Password\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login as Kitchen Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('kitchenToken', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"kitchen@restaurant.com\",\n  \"password\": \"Kitchen@123Password\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login as Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('managerToken', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@restaurant.com\",\n  \"password\": \"Manager@123Password\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('adminToken', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@restaurant.com\",\n  \"password\": \"Admin@123Password\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Branch Management",
+      "item": [
+        {
+          "name": "Get All Branches",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.branches && jsonData.data.branches.length > 0) {",
+                  "    pm.collectionVariables.set('branchId', jsonData.data.branches[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/branches", "host": ["{{baseUrl}}"], "path": ["branches"] }
+          }
+        },
+        {
+          "name": "Get Branch by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/branches/{{branchId}}", "host": ["{{baseUrl}}"], "path": ["branches", "{{branchId}}"] }
+          }
+        },
+        {
+          "name": "Create New Branch (Admin/Manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"The Royal Feast - MG Road\",\n  \"code\": \"MGR04\",\n  \"address\": {\n    \"street\": \"Trinity Circle, MG Road\",\n    \"city\": \"Bangalore\",\n    \"state\": \"Karnataka\",\n    \"zipCode\": \"560001\"\n  },\n  \"phone\": \"+91 80 2555 9999\",\n  \"email\": \"mgroad@royalfeast.com\",\n  \"totalSeatingCapacity\": 90,\n  \"openingTime\": \"11:00\",\n  \"closingTime\": \"23:30\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/branches", "host": ["{{baseUrl}}"], "path": ["branches"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Menu Management",
+      "item": [
+        {
+          "name": "Get All Menu Items (Filtered)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.menuItems && jsonData.data.menuItems.length > 0) {",
+                  "    pm.collectionVariables.set('menuItemId', jsonData.data.menuItems[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/menu?category=Main Course&dietary=non-veg",
+              "host": ["{{baseUrl}}"],
+              "path": ["menu"],
+              "query": [
+                { "key": "category", "value": "Main Course" },
+                { "key": "dietary", "value": "non-veg" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Menu Item (Admin/Manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Shahi Rogan Josh\",\n  \"description\": \"Kashmiri aromatic lamb curry cooked with traditional spices and ratan jot\",\n  \"category\": \"Main Course\",\n  \"dietary\": \"non-veg\",\n  \"price\": 540,\n  \"preparationTimeMinutes\": 25,\n  \"isAvailable\": true,\n  \"isSpecial\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/menu", "host": ["{{baseUrl}}"], "path": ["menu"] }
+          }
+        },
+        {
+          "name": "Toggle Menu Item Availability",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{kitchenToken}}" }],
+            "url": { "raw": "{{baseUrl}}/menu/{{menuItemId}}/toggle-availability", "host": ["{{baseUrl}}"], "path": ["menu", "{{menuItemId}}", "toggle-availability"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Table Inventory Management",
+      "item": [
+        {
+          "name": "Get All Tables for Branch",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.tables && jsonData.data.tables.length > 0) {",
+                  "    pm.collectionVariables.set('tableId', jsonData.data.tables[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tables?branchId={{branchId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tables"],
+              "query": [{ "key": "branchId", "value": "{{branchId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Create Table (Admin/Manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"tableNumber\": \"T-99\",\n  \"capacity\": 6,\n  \"location\": \"rooftop\",\n  \"description\": \"Premium Sunset View Table\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/tables", "host": ["{{baseUrl}}"], "path": ["tables"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Table Reservation Engine",
+      "item": [
+        {
+          "name": "Check Slot Availability for Date",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reservations/availability?branchId={{branchId}}&date=2026-09-10&partySize=4",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservations", "availability"],
+              "query": [
+                { "key": "branchId", "value": "{{branchId}}" },
+                { "key": "date", "value": "2026-09-10" },
+                { "key": "partySize", "value": "4" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Table Reservation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.reservation) {",
+                  "    pm.collectionVariables.set('reservationId', jsonData.data.reservation._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"tableId\": \"{{tableId}}\",\n  \"partySize\": 2,\n  \"reservationDate\": \"2026-09-10\",\n  \"startTime\": \"20:00\",\n  \"durationMinutes\": 90,\n  \"specialRequests\": \"Window seat preferred\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reservations", "host": ["{{baseUrl}}"], "path": ["reservations"] }
+          }
+        },
+        {
+          "name": "Cancel Reservation (Policy Checked)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cancellationReason\": \"Change of personal plans\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reservations/{{reservationId}}/cancel", "host": ["{{baseUrl}}"], "path": ["reservations", "{{reservationId}}", "cancel"] }
+          }
+        },
+        {
+          "name": "Reschedule Reservation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newDate\": \"2026-09-11\",\n  \"newStartTime\": \"19:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/reservations/{{reservationId}}/reschedule", "host": ["{{baseUrl}}"], "path": ["reservations", "{{reservationId}}", "reschedule"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Food Order Placement & Workflow",
+      "item": [
+        {
+          "name": "Place Food Order (Dine-in / Takeaway)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.order) {",
+                  "    pm.collectionVariables.set('orderId', jsonData.data.order._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"{{tableId}}\",\n  \"items\": [\n    {\n      \"menuItemId\": \"{{menuItemId}}\",\n      \"quantity\": 2,\n      \"specialInstructions\": \"Make it extra crispy\"\n    }\n  ],\n  \"notes\": \"Quick service requested\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["orders", "{{orderId}}"] }
+          }
+        },
+        {
+          "name": "Update Order Status (Staff/Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{kitchenToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PREPARING\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/orders/{{orderId}}/status", "host": ["{{baseUrl}}"], "path": ["orders", "{{orderId}}", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Kitchen Display Queue",
+      "item": [
+        {
+          "name": "Get Kitchen Live Queue",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{kitchenToken}}" }],
+            "url": { "raw": "{{baseUrl}}/kitchen/queue", "host": ["{{baseUrl}}"], "path": ["kitchen", "queue"] }
+          }
+        },
+        {
+          "name": "Advance Order Status (1-Click Action)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{kitchenToken}}" }],
+            "url": { "raw": "{{baseUrl}}/kitchen/orders/{{orderId}}/advance", "host": ["{{baseUrl}}"], "path": ["kitchen", "orders", "{{orderId}}", "advance"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Billing & Payment",
+      "item": [
+        {
+          "name": "Get Itemized Bill Summary & Taxes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/billing/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["billing", "{{orderId}}"] }
+          }
+        },
+        {
+          "name": "Process Payment (UPI / Card / Cash)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"UPI\",\n  \"transactionRef\": \"UPI-REF-2026-998811\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/billing/{{orderId}}/pay", "host": ["{{baseUrl}}"], "path": ["billing", "{{orderId}}", "pay"] }
+          }
+        },
+        {
+          "name": "Apply Manager Discount",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{managerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discountPercent\": 15\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/billing/{{orderId}}/discount", "host": ["{{baseUrl}}"], "path": ["billing", "{{orderId}}", "discount"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Customer History & Feedback",
+      "item": [
+        {
+          "name": "Get Customer Order History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/customers/history/orders", "host": ["{{baseUrl}}"], "path": ["customers", "history", "orders"] }
+          }
+        },
+        {
+          "name": "Get Customer Reservation History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/customers/history/reservations", "host": ["{{baseUrl}}"], "path": ["customers", "history", "reservations"] }
+          }
+        },
+        {
+          "name": "Submit Feedback & Rating",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"branchId\": \"{{branchId}}\",\n  \"orderId\": \"{{orderId}}\",\n  \"rating\": 5,\n  \"foodRating\": 5,\n  \"serviceRating\": 5,\n  \"ambienceRating\": 4,\n  \"comment\": \"Amazing culinary experience! Will definitely visit again.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/feedback", "host": ["{{baseUrl}}"], "path": ["feedback"] }
+          }
+        },
+        {
+          "name": "Get Feedback Stats",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/feedback/stats?branchId={{branchId}}", "host": ["{{baseUrl}}"], "path": ["feedback", "stats"], "query": [{ "key": "branchId", "value": "{{branchId}}" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Manager Reports & Analytics",
+      "item": [
+        {
+          "name": "Executive Overview Metrics",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/analytics/overview", "host": ["{{baseUrl}}"], "path": ["analytics", "overview"] }
+          }
+        },
+        {
+          "name": "Popular Dishes Report",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/analytics/popular-dishes?limit=5", "host": ["{{baseUrl}}"], "path": ["analytics", "popular-dishes"], "query": [{ "key": "limit", "value": "5" }] }
+          }
+        },
+        {
+          "name": "Peak Hours Report",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/analytics/peak-hours", "host": ["{{baseUrl}}"], "path": ["analytics", "peak-hours"] }
+          }
+        },
+        {
+          "name": "Revenue by Branch Report",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/analytics/revenue-by-branch", "host": ["{{baseUrl}}"], "path": ["analytics", "revenue-by-branch"] }
+          }
+        },
+        {
+          "name": "Reservation Occupancy Rate",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }],
+            "url": { "raw": "{{baseUrl}}/analytics/reservation-occupancy", "host": ["{{baseUrl}}"], "path": ["analytics", "reservation-occupancy"] }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Royal Feast — Restaurant Table Reservation & Food Ordering System</title>
+  <meta name="description" content="Premium multi-branch restaurant table reservation, live kitchen display queue, and online food ordering system.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Demo Role Switcher Bar -->
+  <header class="demo-role-banner">
+    <div class="role-label">
+      <span>🎭 <strong>Demo Role Switcher:</strong></span>
+      <span id="current-user-badge">Logged in as: <strong>Rahul Sharma (Customer)</strong></span>
+    </div>
+    <div class="role-buttons">
+      <button class="role-pill-btn active" id="btn-role-customer" onclick="switchRole('customer')">👤 Customer (Rahul)</button>
+      <button class="role-pill-btn" id="btn-role-priya" onclick="switchRole('priya')">👤 Customer (Priya)</button>
+      <button class="role-pill-btn" id="btn-role-kitchen" onclick="switchRole('kitchen')">🍳 Kitchen Staff</button>
+      <button class="role-pill-btn" id="btn-role-manager" onclick="switchRole('manager')">👔 Branch Manager</button>
+      <button class="role-pill-btn" id="btn-role-admin" onclick="switchRole('admin')">👑 Admin</button>
+    </div>
+  </header>
+
+  <!-- Sticky Glassmorphic Navbar -->
+  <nav class="main-navbar">
+    <a href="#" class="brand-logo" onclick="switchTab('menu')">
+      <div class="brand-icon">👑</div>
+      <div>
+        <div class="brand-name">THE ROYAL <span>FEAST</span></div>
+        <div class="brand-tag">Table Reservation & Kitchen System</div>
+      </div>
+    </a>
+
+    <div class="nav-links">
+      <button class="nav-btn active" id="nav-menu" onclick="switchTab('menu')">🍽️ Menu & Order</button>
+      <button class="nav-btn" id="nav-reservation" onclick="switchTab('reservation')">🪑 Table Reservation</button>
+      <button class="nav-btn" id="nav-kitchen" onclick="switchTab('kitchen')">👨‍🍳 Kitchen Queue <span class="badge-count" id="nav-kitchen-count">0</span></button>
+      <button class="nav-btn" id="nav-orders" onclick="switchTab('orders')">🧾 My Orders & Bills</button>
+      <button class="nav-btn" id="nav-analytics" onclick="switchTab('analytics')">📊 Analytics</button>
+    </div>
+
+    <div class="nav-actions">
+      <button class="cart-trigger-btn" onclick="toggleCartDrawer(true)">
+        🛒 Cart <span class="badge-count" id="cart-badge-count">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Web App Content Area -->
+  <main class="app-container">
+
+    <!-- =========================================================================
+         VIEW 1: MENU & FOOD ORDERING
+         ========================================================================= -->
+    <section id="view-menu" class="tab-view active">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Culinary Catalog & Online Ordering</h1>
+          <p class="view-subtitle">Select fresh gourmet dishes crafted by our master chefs for dine-in or takeaway.</p>
+        </div>
+        <div>
+          <label class="form-label" style="display:inline; margin-right:8px;">Branch:</label>
+          <select id="branch-select" class="form-control" style="width: auto; display: inline-block;" onchange="onBranchChange()">
+            <!-- Dynamic Branches -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Filter and Search Bar -->
+      <div class="menu-filter-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="menu-search-input" placeholder="Search dishes, curries, tandoor..." oninput="filterMenu()">
+        </div>
+
+        <div class="category-pills" id="category-pills-container">
+          <button class="category-pill active" onclick="selectCategory('ALL')">All Dishes</button>
+          <button class="category-pill" onclick="selectCategory('Appetizer')">Appetizers</button>
+          <button class="category-pill" onclick="selectCategory('Main Course')">Main Course</button>
+          <button class="category-pill" onclick="selectCategory('Breads & Rice')">Breads & Rice</button>
+          <button class="category-pill" onclick="selectCategory('Dessert')">Desserts</button>
+          <button class="category-pill" onclick="selectCategory('Beverage')">Beverages</button>
+        </div>
+
+        <div class="dietary-filters">
+          <button class="dietary-btn" id="filter-veg" onclick="toggleDietaryFilter('veg')">🟢 Veg</button>
+          <button class="dietary-btn" id="filter-non-veg" onclick="toggleDietaryFilter('non-veg')">🔴 Non-Veg</button>
+          <button class="dietary-btn" id="filter-vegan" onclick="toggleDietaryFilter('vegan')">🌱 Vegan</button>
+        </div>
+      </div>
+
+      <!-- Food Menu Grid -->
+      <div class="menu-grid" id="menu-grid-container">
+        <!-- Dynamically rendered menu items -->
+      </div>
+    </section>
+
+
+    <!-- =========================================================================
+         VIEW 2: TABLE RESERVATION ENGINE
+         ========================================================================= -->
+    <section id="view-reservation" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Reserve a Table</h1>
+          <p class="view-subtitle">Experience luxury dining with our slot-based anti-collision table booking engine.</p>
+        </div>
+      </div>
+
+      <div class="reservation-panel">
+        <!-- Booking Form Panel -->
+        <div class="booking-form-card">
+          <h3 style="margin-bottom: 16px; font-family: var(--font-heading);">Table Reservation Details</h3>
+
+          <div class="form-group">
+            <label class="form-label">Selected Branch</label>
+            <select id="resv-branch-select" class="form-control" onchange="onResvParamChange()">
+              <!-- Dynamic Branches -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" id="resv-date" class="form-control" onchange="onResvParamChange()">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Time Slot</label>
+            <select id="resv-time" class="form-control" onchange="onResvParamChange()">
+              <option value="12:00">12:00 PM - 01:30 PM (Lunch)</option>
+              <option value="13:30">01:30 PM - 03:00 PM (Lunch)</option>
+              <option value="19:00">07:00 PM - 08:30 PM (Dinner)</option>
+              <option value="19:30" selected>07:30 PM - 09:00 PM (Dinner)</option>
+              <option value="20:30">08:30 PM - 10:00 PM (Dinner)</option>
+              <option value="21:30">09:30 PM - 11:00 PM (Dinner)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Party Size / Guests</label>
+            <input type="number" id="resv-guests" class="form-control" value="2" min="1" max="12" onchange="onResvParamChange()">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Special Requests (Optional)</label>
+            <textarea id="resv-special" class="form-control" rows="2" placeholder="Anniversary celebration, candle light, window side..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Selected Table</label>
+            <input type="text" id="resv-selected-table-label" class="form-control" value="Select a table from floor plan" readonly style="background: rgba(255,255,255,0.05);">
+            <input type="hidden" id="resv-selected-table-id" value="">
+          </div>
+
+          <button class="form-btn" onclick="submitReservation()">Confirm Reservation ➔</button>
+        </div>
+
+        <!-- Interactive Visual Floor Plan -->
+        <div class="table-layout-card">
+          <div class="table-layout-header">
+            <h3 style="font-family: var(--font-heading);">Interactive Floor Plan & Availability</h3>
+            <div class="table-legend">
+              <div class="legend-item"><span class="legend-dot legend-available"></span> Available</div>
+              <div class="legend-item"><span class="legend-dot legend-occupied"></span> Reserved</div>
+              <div class="legend-item"><span class="legend-dot legend-selected"></span> Selected</div>
+            </div>
+          </div>
+
+          <div class="table-grid" id="tables-grid-container">
+            <!-- Dynamic Tables Layout -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================================
+         VIEW 3: KITCHEN DISPLAY SYSTEM (KDS)
+         ========================================================================= -->
+    <section id="view-kitchen" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Kitchen Order Display Queue (KDS)</h1>
+          <p class="view-subtitle">Live FIFO cooking tickets for kitchen chefs with real-time timers and 1-click status advances.</p>
+        </div>
+        <button class="action-btn-sm" onclick="loadKitchenQueue()">🔄 Refresh Queue</button>
+      </div>
+
+      <div class="kitchen-kanban">
+        <!-- Placed / Pending Column -->
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <span class="col-title">📥 1. Placed Tickets</span>
+            <span class="col-badge" id="col-count-placed">0</span>
+          </div>
+          <div id="kanban-placed-container">
+            <!-- Dynamic Placed Orders -->
+          </div>
+        </div>
+
+        <!-- Preparing Column -->
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <span class="col-title" style="color: var(--accent-gold);">🍳 2. Cooking / In Prep</span>
+            <span class="col-badge" id="col-count-preparing">0</span>
+          </div>
+          <div id="kanban-preparing-container">
+            <!-- Dynamic Preparing Orders -->
+          </div>
+        </div>
+
+        <!-- Ready Column -->
+        <div class="kanban-col">
+          <div class="kanban-col-header">
+            <span class="col-title" style="color: var(--color-success);">🛎️ 3. Ready to Serve</span>
+            <span class="col-badge" id="col-count-ready">0</span>
+          </div>
+          <div id="kanban-ready-container">
+            <!-- Dynamic Ready Orders -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================================
+         VIEW 4: MY ORDERS, BILLS & RESERVATIONS
+         ========================================================================= -->
+    <section id="view-orders" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Customer History, Billing & Ratings</h1>
+          <p class="view-subtitle">View past order tickets, generate detailed itemized tax invoices, and rate your culinary experience.</p>
+        </div>
+      </div>
+
+      <div class="orders-table-card">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Order Number</th>
+              <th>Branch / Table</th>
+              <th>Items</th>
+              <th>Grand Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="customer-orders-tbody">
+            <!-- Dynamic orders list -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Customer Past Reservations Section -->
+      <div style="margin-top: 40px;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 14px;">My Table Reservations</h2>
+        <div class="orders-table-card">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Branch</th>
+                <th>Table</th>
+                <th>Date & Time Slot</th>
+                <th>Party Size</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customer-reservations-tbody">
+              <!-- Dynamic reservations list -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================================
+         VIEW 5: MANAGER DASHBOARD & ANALYTICS
+         ========================================================================= -->
+    <section id="view-analytics" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Executive Analytics & Business Reports</h1>
+          <p class="view-subtitle">High-level sales revenue, popular dishes, peak traffic hours, and branch occupancy.</p>
+        </div>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="analytics-kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Total Sales Revenue</div>
+          <div class="kpi-val" id="kpi-total-revenue">₹0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Completed Orders</div>
+          <div class="kpi-val" id="kpi-completed-orders">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Average Order Value</div>
+          <div class="kpi-val" id="kpi-avg-order">₹0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Table Bookings</div>
+          <div class="kpi-val" id="kpi-reservations">0</div>
+        </div>
+      </div>
+
+      <!-- Charts & Reports Grid -->
+      <div class="analytics-charts-grid">
+        <!-- Popular Dishes -->
+        <div class="chart-card">
+          <div class="chart-card-title">
+            <span>🔥 Top Selling Dishes</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">By Volume</span>
+          </div>
+          <ul class="rank-list" id="popular-dishes-list">
+            <!-- Dynamic ranking -->
+          </ul>
+        </div>
+
+        <!-- Revenue by Branch -->
+        <div class="chart-card">
+          <div class="chart-card-title">
+            <span>🏢 Revenue by Branch</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Multi-location</span>
+          </div>
+          <ul class="rank-list" id="branch-revenue-list">
+            <!-- Dynamic branch breakdown -->
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- =========================================================================
+       CART & CHECKOUT DRAWER
+       ========================================================================= -->
+  <div class="cart-drawer-overlay" id="cart-overlay" onclick="toggleCartDrawer(false)"></div>
+  <aside class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <h3 style="font-family: var(--font-heading); font-size: 1.25rem;">Your Food Cart</h3>
+      <button class="close-modal-btn" onclick="toggleCartDrawer(false)">&times;</button>
+    </div>
+
+    <div class="cart-body" id="cart-items-container">
+      <!-- Dynamic Cart Items -->
+    </div>
+
+    <div class="cart-footer">
+      <div class="bill-line">
+        <span>Subtotal</span>
+        <span id="cart-subtotal">₹0.00</span>
+      </div>
+      <div class="bill-line">
+        <span>GST Tax (5%)</span>
+        <span id="cart-tax">₹0.00</span>
+      </div>
+      <div class="bill-line">
+        <span>Service Charge (5%)</span>
+        <span id="cart-service-charge">₹0.00</span>
+      </div>
+      <div class="bill-total-line">
+        <span>Grand Total</span>
+        <span id="cart-grand-total" style="color: var(--accent-gold);">₹0.00</span>
+      </div>
+
+      <div class="form-group" style="margin-top: 14px;">
+        <label class="form-label">Order Type</label>
+        <select id="cart-order-type" class="form-control" onchange="onCartOrderTypeChange()">
+          <option value="DINE_IN">Dine-In (At Table)</option>
+          <option value="TAKEAWAY">Takeaway / Pickup</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="cart-table-select-wrap">
+        <label class="form-label">Assign to Table</label>
+        <select id="cart-table-select" class="form-control">
+          <!-- Dynamic Tables -->
+        </select>
+      </div>
+
+      <button class="form-btn" onclick="checkoutOrder()">Place Order ➔</button>
+    </div>
+  </aside>
+
+
+  <!-- =========================================================================
+       ITEMIZED TAX INVOICE MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="invoice-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-family: var(--font-heading);" id="invoice-title">Tax Invoice Receipt</h3>
+        <button class="close-modal-btn" onclick="closeInvoiceModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="invoice-body">
+        <!-- Dynamic invoice content -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       FEEDBACK & RATING MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="feedback-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-family: var(--font-heading);">Rate Your Dining Experience</h3>
+        <button class="close-modal-btn" onclick="closeFeedbackModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="feedback-order-id" value="">
+        <input type="hidden" id="feedback-branch-id" value="">
+
+        <div class="form-group">
+          <label class="form-label">Overall Rating (1 to 5 Stars)</label>
+          <select id="feedback-rating" class="form-control">
+            <option value="5">⭐⭐⭐⭐⭐ (5/5) — Excellent</option>
+            <option value="4">⭐⭐⭐⭐ (4/5) — Very Good</option>
+            <option value="3">⭐⭐⭐ (3/5) — Average</option>
+            <option value="2">⭐⭐ (2/5) — Poor</option>
+            <option value="1">⭐ (1/5) — Terrible</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Food Taste Rating (1-5)</label>
+          <input type="number" id="feedback-food-rating" class="form-control" min="1" max="5" value="5">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Service Hospitality Rating (1-5)</label>
+          <input type="number" id="feedback-service-rating" class="form-control" min="1" max="5" value="5">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Review Comment</label>
+          <textarea id="feedback-comment" class="form-control" rows="3" placeholder="Tell us what you loved about your meal..."></textarea>
+        </div>
+
+        <button class="form-btn" onclick="submitFeedbackForm()">Submit Review ➔</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Toast Notifications Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
