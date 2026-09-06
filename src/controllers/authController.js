@@ -15,14 +15,27 @@ const generateToken = (id) => {
 const register = asyncHandler(async (req, res, next) => {
   const { name, email, password, role, phone, address, branchId } = req.body;
 
-  // Prevent direct registration of admin/manager through public route if not authenticated admin
+  // Public registration must always default to 'customer'.
+  // Elevated roles ('kitchen_staff', 'manager', 'admin') can only be assigned by an authenticated admin.
   let assignedRole = 'customer';
-  if (role && ['kitchen_staff', 'manager', 'admin'].includes(role)) {
-    // If request has auth and is admin, allow assigning role; else default to customer
-    if (req.user && req.user.role === 'admin') {
+  if (role && role !== 'customer') {
+    let requestingUser = req.user;
+
+    // Check optional Bearer token if not already populated by middleware
+    if (!requestingUser && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_secret_jwt_key_cia3_food_reservation_2026');
+        requestingUser = await User.findById(decoded.id);
+      } catch (err) {
+        // Token invalid or expired; treat as unauthenticated public caller
+      }
+    }
+
+    if (requestingUser && requestingUser.role === 'admin' && ['kitchen_staff', 'manager', 'admin'].includes(role)) {
       assignedRole = role;
     } else {
-      assignedRole = role; // Allowing for quick setup/demo testing in academic setting
+      assignedRole = 'customer';
     }
   }
 
