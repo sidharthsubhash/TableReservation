@@ -94,6 +94,12 @@ const processPayment = asyncHandler(async (req, res, next) => {
     return next(new AppError(`Order not found with ID ${req.params.orderId}`, 404));
   }
 
+  // Customer ownership check: customers can only pay for their own orders
+  const orderCustomerId = order.customerId._id ? order.customerId._id.toString() : order.customerId.toString();
+  if (req.user.role === 'customer' && orderCustomerId !== req.user._id.toString()) {
+    return next(new AppError('Not authorized to access or pay for this order.', 403));
+  }
+
   if (order.status === 'CANCELLED') {
     return next(new AppError('Cannot pay for a cancelled order.', 400));
   }
