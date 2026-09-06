@@ -45,19 +45,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     dateInput.min = new Date().toISOString().split('T')[0];
   }
 
-  // Login as default customer Rahul
-  await switchRole('customer');
+  // Load public catalogs
   await loadBranches();
   await loadMenu();
   await loadTables();
-  await loadKitchenQueue();
-  await loadCustomerOrders();
-  await loadCustomerReservations();
-  await loadAnalytics();
 
-  // Periodically refresh kitchen queue
+  // Login as default customer Rahul (switchRole loads relevant data)
+  await switchRole('customer');
+
+  // Periodically refresh kitchen queue only for kitchen staff/managers/admins
   setInterval(() => {
-    if (state.currentUser.role !== 'customer') {
+    if (['kitchen_staff', 'manager', 'admin'].includes(state.currentUser.role)) {
       loadKitchenQueue();
     }
   }, 10000);
@@ -135,11 +133,18 @@ async function switchRole(roleKey) {
 
     showToast(`Switched active role to: ${userCred.name}`);
 
-    // Refresh views based on role
-    loadCustomerOrders();
-    loadCustomerReservations();
-    loadKitchenQueue();
-    loadAnalytics();
+    // Refresh views based on active role
+    if (state.currentUser.role === 'customer') {
+      loadCustomerOrders();
+      loadCustomerReservations();
+    } else if (state.currentUser.role === 'kitchen_staff') {
+      loadKitchenQueue();
+    } else if (['manager', 'admin'].includes(state.currentUser.role)) {
+      loadKitchenQueue();
+      loadAnalytics();
+      loadCustomerOrders();
+      loadCustomerReservations();
+    }
   } catch (err) {
     console.warn('Role switch login error:', err);
   }
@@ -158,12 +163,24 @@ function switchTab(tabId) {
   if (targetView) targetView.classList.add('active');
   if (targetNav) targetNav.classList.add('active');
 
-  if (tabId === 'kitchen') loadKitchenQueue();
+  if (tabId === 'kitchen') {
+    if (!['kitchen_staff', 'manager', 'admin'].includes(state.currentUser.role)) {
+      showToast('⚠️ Switch to Kitchen Staff, Manager, or Admin above to use the Kitchen Queue', 'error');
+    } else {
+      loadKitchenQueue();
+    }
+  }
   if (tabId === 'orders') {
     loadCustomerOrders();
     loadCustomerReservations();
   }
-  if (tabId === 'analytics') loadAnalytics();
+  if (tabId === 'analytics') {
+    if (!['manager', 'admin'].includes(state.currentUser.role)) {
+      showToast('⚠️ Switch to Manager or Admin above to view live Business Analytics', 'error');
+    } else {
+      loadAnalytics();
+    }
+  }
   if (tabId === 'reservation') onResvParamChange();
 }
 
@@ -521,6 +538,9 @@ async function cancelReservation(reservationId) {
 // KITCHEN DISPLAY QUEUE
 // =========================================================================
 async function loadKitchenQueue() {
+  if (!['kitchen_staff', 'manager', 'admin'].includes(state.currentUser?.role)) {
+    return;
+  }
   try {
     const res = await apiRequest(`/api/kitchen/queue?branchId=${state.selectedBranchId}`);
     state.kitchenOrders = res.data.queue;
@@ -774,6 +794,9 @@ async function submitFeedbackForm() {
 // MANAGER ANALYTICS & REPORTS
 // =========================================================================
 async function loadAnalytics() {
+  if (!['manager', 'admin'].includes(state.currentUser?.role)) {
+    return;
+  }
   try {
     const [overview, popular, revBranch] = await Promise.all([
       apiRequest('/api/analytics/overview'),
