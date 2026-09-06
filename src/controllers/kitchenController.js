@@ -85,7 +85,7 @@ const advanceOrderStatus = asyncHandler(async (req, res, next) => {
       nextStatus = 'COMPLETED';
       break;
     default:
-      return next(new AppError(`Order is in '${order.status}' state and cannot be advanced.`, 400));
+      return next(new AppError(`Order is in '${order.status}' state and cannot be advanced.`, 409));
   }
 
   order.status = nextStatus;

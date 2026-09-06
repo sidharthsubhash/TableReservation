@@ -177,6 +177,16 @@ const getOrderById = asyncHandler(async (req, res, next) => {
   });
 });
 
+// State transition mapping: each status can ONLY advance to its immediate next sequential state
+const VALID_ORDER_TRANSITIONS = {
+  PLACED: ['PREPARING', 'CANCELLED'],
+  PREPARING: ['READY'],
+  READY: ['SERVED'],
+  SERVED: ['COMPLETED'],
+  COMPLETED: [],
+  CANCELLED: []
+};
+
 // @desc    Update order status workflow (Lifecycle: PLACED -> PREPARING -> READY -> SERVED -> COMPLETED)
 // @route   PATCH /api/orders/:id/status
 // @access  Private (Kitchen Staff, Manager, Admin)
@@ -184,13 +194,27 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
   const { status } = req.body;
   const validStatuses = ['PLACED', 'PREPARING', 'READY', 'SERVED', 'COMPLETED', 'CANCELLED'];
 
-  if (!validStatuses.includes(status)) {
+  if (!status || !validStatuses.includes(status)) {
     return next(new AppError(`Invalid status. Allowed statuses: ${validStatuses.join(', ')}`, 400));
   }
 
   const order = await Order.findById(req.params.id);
   if (!order) {
     return next(new AppError(`Order not found with ID ${req.params.id}`, 404));
+  }
+
+  // Enforce strict order lifecycle state machine
+  const allowedNext = VALID_ORDER_TRANSITIONS[order.status] || [];
+  if (!allowedNext.includes(status)) {
+    const detail = allowedNext.length > 0
+      ? `Allowed next transition: ${allowedNext.join(', ')}.`
+      : `Order is in terminal state '${order.status}' and cannot be transitioned further.`;
+    return next(
+      new AppError(
+        `Invalid order status transition from '${order.status}' to '${status}'. ${detail}`,
+        409
+      )
+    );
   }
 
   // Update item statuses as well if advancing workflow
