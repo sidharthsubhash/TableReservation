@@ -69,11 +69,41 @@
         </div>
       </div>
 
+      <!-- Luxury Royal Hero Banner -->
+      <div class="royal-hero-banner">
+        <div class="hero-content">
+          <div class="hero-tag">✨ Fine Dining Experience & Gourmet Ordering</div>
+          <h2 class="hero-heading">Welcome to <span class="gold-gradient-text">The Royal Feast</span></h2>
+          <p class="hero-subtext">Immerse yourself in authentic royal heritage recipes, charcoal-smoked delicacies, and artisanal beverages crafted with master craftsmanship.</p>
+          <div class="hero-pills">
+            <span class="hero-pill">⚡ 15-Min Live Prep</span>
+            <span class="hero-pill">⭐ 4.9 Critic Rated</span>
+            <span class="hero-pill">🌿 100% Fresh & Authentic</span>
+            <span class="hero-pill">🍷 Dine-In & Takeaway</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="hero-btn-primary" onclick="switchTab('reservation')">🪑 Reserve a Table</button>
+          <button class="hero-btn-secondary" onclick="scrollToMenu()">🍽️ Browse Catalog</button>
+        </div>
+      </div>
+
       <!-- Filter and Search Bar -->
-      <div class="menu-filter-bar">
+      <div class="menu-filter-bar" id="menu-catalog-section">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" id="menu-search-input" placeholder="Search dishes, curries, tandoor..." oninput="filterMenu()">
+          <input type="text" id="menu-search-input" placeholder="Search dishes, curries, tandoor, desserts..." oninput="onSearchInput()">
+          <button type="button" class="clear-search-btn" id="clear-search-btn" onclick="clearSearch()" style="display:none;" title="Clear search">&times;</button>
+        </div>
+
+        <div class="sort-select-wrap">
+          <span class="sort-label">Sort By:</span>
+          <select id="menu-sort-select" class="form-control sort-select" onchange="filterMenu()">
+            <option value="featured">✨ Recommended</option>
+            <option value="price-asc">💵 Price: Low to High</option>
+            <option value="price-desc">💎 Price: High to Low</option>
+            <option value="name-asc">🔤 Name: A to Z</option>
+          </select>
         </div>
 
         <div class="category-pills" id="category-pills-container">
@@ -90,6 +120,12 @@
           <button class="dietary-btn" id="filter-non-veg" onclick="toggleDietaryFilter('non-veg')">🔴 Non-Veg</button>
           <button class="dietary-btn" id="filter-vegan" onclick="toggleDietaryFilter('vegan')">🌱 Vegan</button>
         </div>
+      </div>
+
+      <!-- Menu Items Counter -->
+      <div class="menu-status-bar">
+        <span id="menu-item-count" class="menu-count-badge">Loading gourmet items...</span>
+        <span class="menu-live-indicator">🟢 Live Kitchen Active • Orders accepted</span>
       </div>
 
       <!-- Food Menu Grid -->
@@ -141,7 +177,13 @@
 
           <div class="form-group">
             <label class="form-label">Party Size / Guests</label>
-            <input type="number" id="resv-guests" class="form-control" value="2" min="1" max="12" onchange="onResvParamChange()">
+            <div class="guest-pills-row" id="guest-pills-container">
+              <button type="button" class="guest-pill active" onclick="setPartySize(2)">2 Guests</button>
+              <button type="button" class="guest-pill" onclick="setPartySize(4)">4 Guests</button>
+              <button type="button" class="guest-pill" onclick="setPartySize(6)">6 Guests</button>
+              <button type="button" class="guest-pill" onclick="setPartySize(8)">8+ Guests</button>
+            </div>
+            <input type="number" id="resv-guests" class="form-control" value="2" min="1" max="12" onchange="onResvParamChange()" style="margin-top: 8px;">
           </div>
 
           <div class="form-group">
@@ -161,12 +203,31 @@
         <!-- Interactive Visual Floor Plan -->
         <div class="table-layout-card">
           <div class="table-layout-header">
-            <h3 style="font-family: var(--font-heading);">Interactive Floor Plan & Availability</h3>
+            <div>
+              <h3 style="font-family: var(--font-heading);">Interactive Floor Plan & Availability</h3>
+              <div class="zone-filters" id="zone-filter-container">
+                <button type="button" class="zone-pill active" onclick="filterTableZone('ALL')">All Areas</button>
+                <button type="button" class="zone-pill" onclick="filterTableZone('MAIN_DINING')">Main Dining</button>
+                <button type="button" class="zone-pill" onclick="filterTableZone('WINDOW_SIDE')">Window Side</button>
+                <button type="button" class="zone-pill" onclick="filterTableZone('VIP_LOUNGE')">VIP Lounge</button>
+                <button type="button" class="zone-pill" onclick="filterTableZone('OUTDOOR_TERRACE')">Terrace</button>
+              </div>
+            </div>
             <div class="table-legend">
               <div class="legend-item"><span class="legend-dot legend-available"></span> Available</div>
               <div class="legend-item"><span class="legend-dot legend-occupied"></span> Reserved</div>
               <div class="legend-item"><span class="legend-dot legend-selected"></span> Selected</div>
             </div>
+          </div>
+
+          <!-- Selected Table Banner -->
+          <div id="selected-table-banner" class="selected-table-preview-card" style="display:none;">
+            <div class="table-preview-icon">🪑</div>
+            <div class="table-preview-details">
+              <div class="table-preview-title" id="preview-table-title">Table Selected</div>
+              <div class="table-preview-subtitle" id="preview-table-subtitle">Capacity: 4 guests • Main Dining</div>
+            </div>
+            <span class="table-preview-ready-badge">Ready to Book</span>
           </div>
 
           <div class="table-grid" id="tables-grid-container">
@@ -186,7 +247,10 @@
           <h1 class="view-title">Kitchen Order Display Queue (KDS)</h1>
           <p class="view-subtitle">Live FIFO cooking tickets for kitchen chefs with real-time timers and 1-click status advances.</p>
         </div>
-        <button class="action-btn-sm" onclick="loadKitchenQueue()">🔄 Refresh Queue</button>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="live-pulse-badge"><span class="pulse-dot"></span> Live Queue Active</span>
+          <button class="action-btn-sm" onclick="loadKitchenQueue()">🔄 Refresh Queue</button>
+        </div>
       </div>
 
       <div class="kitchen-kanban">
@@ -234,6 +298,15 @@
         <div>
           <h1 class="view-title">Customer History, Billing & Ratings</h1>
           <p class="view-subtitle">View past order tickets, generate detailed itemized tax invoices, and rate your culinary experience.</p>
+        </div>
+      </div>
+
+      <!-- Orders Filter Tabs -->
+      <div class="orders-filter-bar">
+        <div class="category-pills" id="orders-filter-pills">
+          <button type="button" class="category-pill active" onclick="filterCustomerOrders('ALL')">All Orders</button>
+          <button type="button" class="category-pill" onclick="filterCustomerOrders('ACTIVE')">Active / In Kitchen</button>
+          <button type="button" class="category-pill" onclick="filterCustomerOrders('COMPLETED')">Completed & Paid</button>
         </div>
       </div>
 
@@ -346,48 +419,85 @@
   <div class="cart-drawer-overlay" id="cart-overlay" onclick="toggleCartDrawer(false)"></div>
   <aside class="cart-drawer" id="cart-drawer">
     <div class="cart-header">
-      <h3 style="font-family: var(--font-heading); font-size: 1.25rem;">Your Food Cart</h3>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.3rem;">🛒</span>
+        <h3 style="font-family: var(--font-heading); font-size: 1.25rem;">Your Food Cart</h3>
+      </div>
       <button class="close-modal-btn" onclick="toggleCartDrawer(false)">&times;</button>
     </div>
 
-    <div class="cart-body" id="cart-items-container">
-      <!-- Dynamic Cart Items -->
+    <!-- Scrollable Cart Area -->
+    <div class="cart-scroll-container">
+      <div class="cart-body" id="cart-items-container">
+        <!-- Dynamic Cart Items -->
+      </div>
+
+      <!-- Order Preferences & Bill Details -->
+      <div class="cart-options-section" id="cart-options-section">
+        <!-- Promo Code Section -->
+        <div class="promo-section">
+          <label class="form-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span>🎟️ Promo Coupon</span>
+            <span class="quick-coupon-link" onclick="applyPromoCode('ROYAL10')">Use ROYAL10 (10% off)</span>
+          </label>
+          <div class="promo-input-group">
+            <input type="text" id="cart-promo-input" class="form-control promo-input" placeholder="Enter coupon code" style="text-transform:uppercase;">
+            <button type="button" class="promo-btn" onclick="applyPromoCode()">Apply</button>
+          </div>
+          <div id="promo-status-msg" class="promo-msg" style="display:none;"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Order Type</label>
+          <select id="cart-order-type" class="form-control" onchange="onCartOrderTypeChange()">
+            <option value="DINE_IN">Dine-In (At Table)</option>
+            <option value="TAKEAWAY">Takeaway / Pickup</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="cart-table-select-wrap">
+          <label class="form-label">Assign to Table</label>
+          <select id="cart-table-select" class="form-control">
+            <!-- Dynamic Tables -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Chef Notes / Cooking Preference</label>
+          <input type="text" id="cart-order-notes" class="form-control" placeholder="e.g., Less spicy, extra chutney, serve together">
+        </div>
+
+        <!-- Bill Breakdown -->
+        <div class="cart-bill-breakdown">
+          <div class="bill-line">
+            <span>Subtotal</span>
+            <span id="cart-subtotal">₹0.00</span>
+          </div>
+          <div class="bill-line" id="bill-discount-line" style="display:none; color:var(--color-success);">
+            <span id="discount-label">Discount</span>
+            <span id="cart-discount">-₹0.00</span>
+          </div>
+          <div class="bill-line">
+            <span>GST Tax (5%)</span>
+            <span id="cart-tax">₹0.00</span>
+          </div>
+          <div class="bill-line">
+            <span>Service Charge (5%)</span>
+            <span id="cart-service-charge">₹0.00</span>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- Sticky Bottom Bar -->
     <div class="cart-footer">
-      <div class="bill-line">
-        <span>Subtotal</span>
-        <span id="cart-subtotal">₹0.00</span>
+      <div class="cart-bottom-bar">
+        <div class="bottom-total-wrap">
+          <span class="bottom-total-label">Grand Total</span>
+          <span class="bottom-total-val" id="cart-grand-total">₹0.00</span>
+        </div>
+        <button class="form-btn checkout-submit-btn" onclick="checkoutOrder()">Place Order ➔</button>
       </div>
-      <div class="bill-line">
-        <span>GST Tax (5%)</span>
-        <span id="cart-tax">₹0.00</span>
-      </div>
-      <div class="bill-line">
-        <span>Service Charge (5%)</span>
-        <span id="cart-service-charge">₹0.00</span>
-      </div>
-      <div class="bill-total-line">
-        <span>Grand Total</span>
-        <span id="cart-grand-total" style="color: var(--accent-gold);">₹0.00</span>
-      </div>
-
-      <div class="form-group" style="margin-top: 14px;">
-        <label class="form-label">Order Type</label>
-        <select id="cart-order-type" class="form-control" onchange="onCartOrderTypeChange()">
-          <option value="DINE_IN">Dine-In (At Table)</option>
-          <option value="TAKEAWAY">Takeaway / Pickup</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="cart-table-select-wrap">
-        <label class="form-label">Assign to Table</label>
-        <select id="cart-table-select" class="form-control">
-          <!-- Dynamic Tables -->
-        </select>
-      </div>
-
-      <button class="form-btn" onclick="checkoutOrder()">Place Order ➔</button>
     </div>
   </aside>
 
@@ -399,7 +509,10 @@
     <div class="modal-card">
       <div class="modal-header">
         <h3 style="font-family: var(--font-heading);" id="invoice-title">Tax Invoice Receipt</h3>
-        <button class="close-modal-btn" onclick="closeInvoiceModal()">&times;</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="action-btn-sm print-receipt-btn" onclick="printInvoice()">🖨️ Print</button>
+          <button class="close-modal-btn" onclick="closeInvoiceModal()">&times;</button>
+        </div>
       </div>
       <div class="modal-body" id="invoice-body">
         <!-- Dynamic invoice content -->
