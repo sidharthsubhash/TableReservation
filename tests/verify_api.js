@@ -6,6 +6,7 @@ dotenv.config();
 const app = require('../src/app');
 const connectDB = require('../src/config/db');
 const seedData = require('../src/seed/seeder');
+const { validateBillItems, formatCurrency } = require('../src/utils/billCalculator');
 
 let server;
 let baseUrl;
@@ -270,6 +271,11 @@ const runTests = async () => {
     });
     const payData = await payRes.json();
     assert(payRes.status === 200 && payData.data.paymentStatus === 'PAID', 'Process order payment marks order as PAID and COMPLETED');
+
+    const validCheck = validateBillItems([{ price: 150, quantity: 2 }]);
+    const invalidCheck = validateBillItems([{ price: -10, quantity: 1 }]);
+    const formatted = formatCurrency(250.5);
+    assert(validCheck.isValid && !invalidCheck.isValid && formatted.includes('250.50'), 'Billing utility validates item items and formats currency correctly');
 
     // -------------------------------------------------------------
     // MODULE 9: RESERVATION CANCELLATION & RESCHEDULE POLICY
